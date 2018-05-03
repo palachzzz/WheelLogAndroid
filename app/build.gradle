@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    //buildToolsVersion "25.0.0"
 
     lintOptions {
         abortOnError false
@@ -10,10 +10,11 @@ android {
 
     defaultConfig {
         applicationId "com.cooper.wheellog"
+        vectorDrawables.useSupportLibrary = true
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 34
-        versionName "2.0.5"
+        versionName "2.0.6"
     }
     buildTypes {
         release {
@@ -23,7 +24,7 @@ android {
     }
 }
 
-apply plugin: 'android-apt'
+//apply plugin: 'android-apt'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -36,5 +37,6 @@ dependencies {
     compile 'com.pavelsikun:material-seekbar-preference:2.3.0+'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0'
     compile "com.github.hotchemi:permissionsdispatcher:2.2.0"
-    apt "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+    annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.2.0'
+    //apt "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
 }
