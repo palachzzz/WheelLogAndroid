@@ -171,6 +171,14 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 				int led_mode = Integer.parseInt(sharedPreferences.getString(getString(R.string.led_mode), "0"));
 				WheelData.getInstance().updateLedMode(led_mode);
 				break;
+            case "use_ratio":
+                boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
+                WheelData.getInstance().setUseRatio(use_ratio);
+                break;
+            case "gotway_84v":
+                boolean g84v_enabled = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
+                WheelData.getInstance().setGotway84V(g84v_enabled);
+                break;
 //			case "reset_user_trip":				
 //				WheelData.getInstance().resetUserDistance();
 //				break;
