@@ -14,7 +14,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 34
-        versionName "2.0.8a"
+        versionName "2.0.9"
     }
     buildTypes {
         release {
