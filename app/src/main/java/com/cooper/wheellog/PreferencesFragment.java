@@ -42,16 +42,19 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
-        /*
-        Preference pref = findPreference( "@string/VersionTag" );
+
+        Preference pref = getPreferenceManager().findPreference("@string/VersionTag");
+        if (pref == null) return;
+
         try {
             PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            String version = pInfo.versionName;
-            pref.setTitle("V"+version);
+            String version = "pInfo";
+            if (pInfo != null) version = "V" + pInfo.versionName;
+            pref.setTitle(version);
         }
-        catch (PackageManager.NameNotFoundException e)
+//        catch (PackageManager.NameNotFoundException e)
+        catch (Exception e)
             { ; }
-        */
     }
 
     @Override
