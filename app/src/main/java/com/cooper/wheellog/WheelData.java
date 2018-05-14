@@ -675,6 +675,29 @@ public class WheelData {
 		
     }
 
+    public void makeWheelBeep()
+    {
+        switch (mWheelType)
+        {
+            case GOTWAY:
+                    mBluetoothLeService.writeBluetoothGattCharacteristic("b".getBytes());
+                    break;
+            case INMOTION: break;
+            case KINGSONG:
+                    byte[] data = new byte[20];
+                    data[0] = (byte) 0xaa;
+                    data[1] = (byte)0x55;
+                    data[16] = (byte) 0x88;
+                    data[17] = 0x14;
+                    data[18] = 0x5a;
+                    data[19] = 0x5a;
+                    mBluetoothLeService.writeBluetoothGattCharacteristic(data);
+                break;
+            case NINEBOT:  break;
+            default:
+        }
+    }
+
     private void raiseAlarm(ALARM_TYPE alarmType, Context mContext) {
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         long[] pattern = {0};

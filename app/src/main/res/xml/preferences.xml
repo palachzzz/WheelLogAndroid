@@ -37,5 +37,9 @@
         android:key="@string/reset_user_distance"
 		android:enabled="true"
         android:title="Reset user distance" />
+    <Preference
+        android:key="@string/VersionTag"
+        android:enabled="true"
+        android:title="V2.0.6a" />
 
 </PreferenceScreen>

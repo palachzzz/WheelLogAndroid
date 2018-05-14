@@ -3,6 +3,8 @@ package com.cooper.wheellog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -15,8 +17,6 @@ import com.cooper.wheellog.utils.Constants;
 import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
 import com.cooper.wheellog.utils.SettingsUtil;
 import com.pavelsikun.seekbarpreference.SeekBarPreference;
-
-import timber.log.Timber;
 
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -39,8 +39,19 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+        /*
+        Preference pref = findPreference( "@string/VersionTag" );
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            String version = pInfo.versionName;
+            pref.setTitle("V"+version);
+        }
+        catch (PackageManager.NameNotFoundException e)
+            { ; }
+        */
     }
 
     @Override

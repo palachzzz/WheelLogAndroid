@@ -87,6 +87,7 @@
     <string name="watch_preferences" translatable="false">watch_preferences</string>
     <string name="wheel_settings" translatable="false">wheel_settings</string> 
 	<string name="trip_settings" translatable="false">trip_settings</string>
+    <string name="VersionTag" translatable="false">VersionTag</string>
 
 
     // ALARM PREFERENCES
