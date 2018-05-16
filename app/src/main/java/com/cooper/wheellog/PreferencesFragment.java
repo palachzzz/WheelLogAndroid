@@ -45,7 +45,12 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+        updateVersionTag();
 
+    }
+
+    private void updateVersionTag()
+    {
         Preference pref = getPreferenceScreen().findPreference(getString(R.string.VersionTag));
         if (pref == null) return;
 
@@ -56,7 +61,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
             pref.setTitle(version);
         }
         catch (Exception e)
-            { ; }
+        { ; }
     }
 
     @Override
@@ -520,6 +525,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         getPreferenceScreen().removeAll();
 
         addPreferencesFromResource(R.xml.preferences);
+        updateVersionTag();
 		//System.out.println("ShowMainMenuRecognized");
 		Preference wheel_button = findPreference(getString(R.string.wheel_settings));
 		mWheelType = WheelData.getInstance().getWheelType();
