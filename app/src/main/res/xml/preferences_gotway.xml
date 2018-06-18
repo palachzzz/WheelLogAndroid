@@ -54,9 +54,11 @@
         android:title="My Wheel is a Gotway MCM "
         android:summary="If your wheel is a Gotway MCM, and it shows wrong speed, distance and others parameters, it should make them normal" />
 
+
 	<CheckBoxPreference
         android:key="@string/gotway_84v"
         android:title="My Wheel is a Gotway with 84V battery"
         android:summary="If your wheel is a Gotway with 20S (84V) battery" />
+
 		
 </PreferenceScreen>

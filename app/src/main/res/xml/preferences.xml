@@ -46,4 +46,8 @@
         android:enabled="true"
         android:title="Vx.y.zr" />
 
+    <Preference
+        android:key="@string/last_mac"
+        android:enabled="true"
+        android:title="Edit MAC address" />
 </PreferenceScreen>

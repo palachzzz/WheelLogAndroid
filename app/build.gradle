@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    //buildToolsVersion "25.0.0"
+    buildToolsVersion '27.0.3'
+
 
     lintOptions {
         abortOnError false
@@ -15,6 +16,7 @@ android {
         targetSdkVersion 25
         versionCode 34
         versionName "2.0.9"
+
     }
     buildTypes {
         release {
@@ -37,6 +39,6 @@ dependencies {
     implementation 'com.pavelsikun:material-seekbar-preference:2.3.0+'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.0'
     implementation "com.github.hotchemi:permissionsdispatcher:2.2.0"
-    annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.2.0'
-    //apt "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+
 }
