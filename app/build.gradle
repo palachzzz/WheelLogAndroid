@@ -4,16 +4,19 @@ android {
     compileSdkVersion 25
     buildToolsVersion '27.0.3'
 
+
     lintOptions {
         abortOnError false
     }
 
     defaultConfig {
         applicationId "com.cooper.wheellog"
+        vectorDrawables.useSupportLibrary = true
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 34
-        versionName "2.0.8"
+        versionName "2.0.9"
+
     }
     buildTypes {
         release {
@@ -37,4 +40,5 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.0'
     implementation "com.github.hotchemi:permissionsdispatcher:2.2.0"
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+
 }

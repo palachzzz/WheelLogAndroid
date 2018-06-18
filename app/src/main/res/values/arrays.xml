@@ -7,7 +7,7 @@
 
     <string-array name="horn_modes">
         <item>Disabled</item>
-        <item>On-board (KingSong)</item>
+        <item>Built-In (KS/GW)</item>
         <item>via bluetooth audio</item>
     </string-array>
 

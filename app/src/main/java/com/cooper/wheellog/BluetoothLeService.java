@@ -100,6 +100,10 @@ public class BluetoothLeService extends Service {
                     }
                     break;
                 case Constants.ACTION_REQUEST_KINGSONG_HORN:
+                    WheelData.getInstance().makeWheelBeep();
+                    /* this is type-specific wheel beep code that has been moved to WheelData::makeWheelBeep().
+                       type-specific code has been implemented there.
+
                     if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.KINGSONG) {
                         byte[] data = new byte[20];
                         data[0] = (byte) -86;
@@ -110,6 +114,7 @@ public class BluetoothLeService extends Service {
                         data[19] = (byte) 90;
                         writeBluetoothGattCharacteristic(data);
                     }
+                    */
                     break;
                 case Constants.ACTION_REQUEST_CONNECTION_TOGGLE:
                     if (mConnectionState == STATE_DISCONNECTED)

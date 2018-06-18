@@ -3,6 +3,8 @@ package com.cooper.wheellog;
 import android.Manifest;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -59,12 +61,14 @@ import com.viewpagerindicator.LinePageIndicator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.UUID;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 import timber.log.Timber;
 
+import static com.cooper.wheellog.utils.Constants.ACTION_REQUEST_KINGSONG_HORN;
 import static com.cooper.wheellog.utils.MathsUtil.kmToMiles;
 
 
@@ -880,9 +884,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
                 return true;
             default:
-                return super.onKeyDown(keyCode, event);
+                return super.onKeyDown(keyCode, event); // should this not be super.OnKeyUp() instead?  *MacPara 20180504
         }
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) ||
+                (keyCode == KeyEvent.KEYCODE_VOLUME_UP))
+        {
+            // Add code to sound the alarm here...
+            WheelData.getInstance().makeWheelBeep();
+            return true;
+        }
+        else
+            return super.onKeyDown(keyCode, event);
+
+    }
+
 
     ViewPager.SimpleOnPageChangeListener pageChangeListener = new ViewPager.SimpleOnPageChangeListener(){
         @Override
@@ -899,13 +919,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int max_speed = sharedPreferences.getInt(getString(R.string.max_speed), 30) * 10;
         wheelView.setMaxSpeed(max_speed);
         wheelView.setUseMPH(use_mph);
+        WheelData.getInstance().setUseRatio(sharedPreferences.getBoolean(getString(R.string.use_ratio), false));
+        WheelData.getInstance().setGotway84V(sharedPreferences.getBoolean(getString(R.string.gotway_84v), false));
+
         wheelView.invalidate();
 
         boolean alarms_enabled = sharedPreferences.getBoolean(getString(R.string.alarms_enabled), false);
+
 		boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
 		WheelData.getInstance().setUseRatio(use_ratio);
         boolean gotway_84v = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
         WheelData.getInstance().setGotway84V(gotway_84v);
+
 		WheelData.getInstance().setAlarmsEnabled(alarms_enabled);
 
         if (alarms_enabled) {

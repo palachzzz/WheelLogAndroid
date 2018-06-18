@@ -3,6 +3,8 @@ package com.cooper.wheellog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -18,8 +20,6 @@ import com.cooper.wheellog.utils.Constants;
 import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
 import com.cooper.wheellog.utils.SettingsUtil;
 import com.pavelsikun.seekbarpreference.SeekBarPreference;
-
-import timber.log.Timber;
 
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -42,8 +42,26 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+        updateVersionTag();
+
+    }
+
+    private void updateVersionTag()
+    {
+        Preference pref = getPreferenceScreen().findPreference(getString(R.string.VersionTag));
+        if (pref == null) return;
+
+        try {
+            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            String version = "pInfo";
+            if (pInfo != null) version = "V" + pInfo.versionName;
+            pref.setTitle(version);
+        }
+        catch (Exception e)
+        { ; }
     }
 
     @Override
@@ -174,6 +192,14 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 				int led_mode = Integer.parseInt(sharedPreferences.getString(getString(R.string.led_mode), "0"));
 				WheelData.getInstance().updateLedMode(led_mode);
 				break;
+            case "use_ratio":
+                boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
+                WheelData.getInstance().setUseRatio(use_ratio);
+                break;
+            case "gotway_84v":
+                boolean g84v_enabled = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
+                WheelData.getInstance().setGotway84V(g84v_enabled);
+                break;
 //			case "reset_user_trip":				
 //				WheelData.getInstance().resetUserDistance();
 //				break;
@@ -356,7 +382,6 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                                     builder1.show();
 
 
-
                                     //SettingsUtil.setPasswordForWheel(getActivity(), deviceAddress, "000000");
                                     //finish();
                                 }
@@ -373,7 +398,6 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
                             return true;
                         }
-
                     });
                 }
 
@@ -505,6 +529,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         getPreferenceScreen().removeAll();
 
         addPreferencesFromResource(R.xml.preferences);
+        updateVersionTag();
 		//System.out.println("ShowMainMenuRecognized");
 		Preference wheel_button = findPreference(getString(R.string.wheel_settings));
 		mWheelType = WheelData.getInstance().getWheelType();
