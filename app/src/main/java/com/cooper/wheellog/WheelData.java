@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Vibrator;
 
 import android.text.InputType;
@@ -678,6 +679,7 @@ public class WheelData {
     private void raiseAlarm(ALARM_TYPE alarmType, Context mContext) {
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         long[] pattern = {0};
+        MediaPlayer mp = new MediaPlayer();
         Intent intent = new Intent(Constants.ACTION_ALARM_TRIGGERED);
         intent.putExtra(Constants.INTENT_EXTRA_ALARM_TYPE, alarmType);
 
@@ -696,6 +698,23 @@ public class WheelData {
                 break;
         }
         mContext.sendBroadcast(intent);
+        //Beeper
+        //TODO adicionar a verificacao de fone de ouvido.
+        //If it`s not playing any sound already fire the sound
+        if (mp.isPlaying() == false) {
+            mp = MediaPlayer.create(mContext, R.raw.bicycle_bell);
+            mp.start();
+            //That fires after the sound has played so it releases the resourse.
+            //Needed otherwise it would stop working after a while
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                    mp.release();
+                    mp.reset();
+                }
+            });
+        }
+
+
         if (v.hasVibrator() && !mDisablePhoneVibrate)
             v.vibrate(pattern, -1);
     }
