@@ -737,7 +737,7 @@ public class WheelData {
                         public void onCompletion(MediaPlayer mp) {
                             mp.reset();
                             mp.release();
-                            mGeneralInMotionAlarmExecuted = true;
+                            mGeneralInMotionAlarmExecuted = false;
                         }
                     });
                 }
