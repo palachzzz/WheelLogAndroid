@@ -1,6 +1,8 @@
 package com.cooper.wheellog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
@@ -29,6 +31,7 @@ public class WheelData {
     private static final int TIME_BUFFER = 10;
     private static WheelData mInstance;
 	private Timer ridingTimerControl;
+	private MediaPlayer mAlertSoundPlayer;
 
     private BluetoothLeService mBluetoothLeService;
 
@@ -69,6 +72,7 @@ public class WheelData {
 	private String mBtName = "";
 	
 	private String mAlert = "";
+    private int mAlertId = 0;
 
 //    private int mVersion; # sorry King, but INT not good for Inmo
 	private String mVersion = "";
@@ -85,6 +89,7 @@ public class WheelData {
 	private int mWheelTiltHorizon = 0;
 	
     private boolean mAlarmsEnabled = false;
+    private boolean mInmotionAlarmsEnabled = false;
     private boolean mDisablePhoneVibrate = false;
     private int mAlarm1Speed = 0;
     private int mAlarm2Speed = 0;
@@ -102,6 +107,7 @@ public class WheelData {
 	private boolean mSpeedAlarmExecuted = false;
     private boolean mCurrentAlarmExecuted = false;
 	private boolean mTemperatureAlarmExecuted = false;
+	private boolean mGeneralInMotionAlarmExecuted = false;
 
     static void initiate() {
         if (mInstance == null)
@@ -574,6 +580,10 @@ public class WheelData {
     void setAlarmsEnabled(boolean enabled) {
         mAlarmsEnabled = enabled;
     }
+
+    void setInmotionAlarmsEnabled(boolean enabled){
+        mInmotionAlarmsEnabled = enabled;
+    }
 	
 	void setUseRatio(boolean enabled) {
         mUseRatio = enabled;
@@ -681,13 +691,26 @@ public class WheelData {
             if (mTemperature < mAlarmTemperature)
                 mTemperatureAlarmExecuted = false;
         }
+
 		
+    }
+
+    private void checkInMotionAlarmStatus(Context mContext) {
+        // GENERAL inMotion Alarm
+        if (!mGeneralInMotionAlarmExecuted)
+        {
+            if (mAlertId != 0) {
+                raiseAlarm(ALARM_TYPE.GENERAL,mContext);
+                mAlertId = 0;
+            }
+        }
     }
 
     private void raiseAlarm(ALARM_TYPE alarmType, Context mContext) {
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-        long[] pattern = {0};
         MediaPlayer mp = new MediaPlayer();
+
+        long[] pattern = {0};
         Intent intent = new Intent(Constants.ACTION_ALARM_TRIGGERED);
         intent.putExtra(Constants.INTENT_EXTRA_ALARM_TYPE, alarmType);
 
@@ -704,24 +727,23 @@ public class WheelData {
                 pattern = new long[]{0, 500, 100, 100, 100, 500, 100, 100, 100, 500, 100, 100, 100};
                 mCurrentAlarmExecuted = true;
                 break;
+            case GENERAL:
+                if (mp.isPlaying() == false) {
+                    mp = MediaPlayer.create(mContext, R.raw.bicycle_bell);
+                    mp.start();
+                    //That fires after the sound has played so it releases the resourse.
+                    //Needed otherwise it would stop working after a while
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.reset();
+                            mp.release();
+                            mGeneralInMotionAlarmExecuted = true;
+                        }
+                    });
+                }
+                break;
         }
         mContext.sendBroadcast(intent);
-        //Beeper
-        //TODO adicionar a verificacao de fone de ouvido.
-        //If it`s not playing any sound already fire the sound
-        if (mp.isPlaying() == false) {
-            mp = MediaPlayer.create(mContext, R.raw.bicycle_bell);
-            mp.start();
-            //That fires after the sound has played so it releases the resourse.
-            //Needed otherwise it would stop working after a while
-            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                public void onCompletion(MediaPlayer mp) {
-                    mp.release();
-                    mp.reset();
-                }
-            });
-        }
-
 
         if (v.hasVibrator() && !mDisablePhoneVibrate)
             v.vibrate(pattern, -1);
@@ -777,6 +799,9 @@ public class WheelData {
 
 		if (mAlarmsEnabled) 
 			checkAlarmStatus(mContext);
+		if (mInmotionAlarmsEnabled)
+		    checkInMotionAlarmStatus(mContext);
+
 		mContext.sendBroadcast(intent);
         
        
@@ -1017,6 +1042,11 @@ public class WheelData {
 				} else {
 					mAlert = mAlert + " | " + ((InMotionAdapter.Alert) status).getfullText();
 				}
+                mAlertId = ((InMotionAdapter.Alert) status).getAlertId(); //mAlertId is checked on checkAlarms function.
+				if (mAlertId == 0x05) //Discards alerts that the user does not need.
+                {
+                    mAlertId = 0;
+                }
 			} else {
                 mSpeed = (int) (status.getSpeed() * 360d);
                 mVoltage = (int) (status.getVoltage() * 100d);

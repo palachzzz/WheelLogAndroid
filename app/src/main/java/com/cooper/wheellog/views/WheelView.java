@@ -490,6 +490,7 @@ public class WheelView extends View {
             canvas.drawText(getResources().getString(R.string.distance), blRect.centerX(), blRect.centerY() - (box_inner_padding / 2), textPaint);
             canvas.drawText(getResources().getString(R.string.total), brRect.centerX(), brRect.centerY() - (box_inner_padding / 2), textPaint);
 
+            //canvas.drawText(String.format(Locale.US, "%.2fV (%.2fV)", mVoltage, (mVoltage/16.0)), tlRect.centerX(), tlRect.centerY() + boxTextHeight, textPaint);
             canvas.drawText(String.format(Locale.US, "%.2fV", mVoltage), tlRect.centerX(), tlRect.centerY() + boxTextHeight, textPaint);
             //canvas.drawText(String.format(Locale.US, "%.2fW", mCurrent), trRect.centerX(), trRect.centerY() + boxTextHeight, textPaint);
             canvas.drawText(mCurrentTime, mlRect.centerX(), mlRect.centerY() + boxTextHeight + (box_inner_padding / 2), textPaint);

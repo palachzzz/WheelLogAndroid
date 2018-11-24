@@ -964,6 +964,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         wheelView.invalidate();
 
         boolean alarms_enabled = sharedPreferences.getBoolean(getString(R.string.alarms_enabled), false);
+        boolean inMotion_general_alarms_enable = sharedPreferences.getBoolean(getString(R.string.inMotion_alarms_enabled),false);
 		boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
 		WheelData.getInstance().setUseRatio(use_ratio);
 
@@ -973,6 +974,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         //boolean gotway_84v = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
         //WheelData.getInstance().setGotway84V(gotway_84v);
 		WheelData.getInstance().setAlarmsEnabled(alarms_enabled);
+
+		WheelData.getInstance().setInmotionAlarmsEnabled(inMotion_general_alarms_enable);
 
         if (alarms_enabled) {
             int alarm1Speed = sharedPreferences.getInt(getString(R.string.alarm_1_speed), 0);

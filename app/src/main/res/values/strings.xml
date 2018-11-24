@@ -91,6 +91,7 @@
 
 
     // ALARM PREFERENCES
+    <string name="inMotion_alarms_enabled" translatable="false">inMotion_alarms_enabled</string>
     <string name="alarms_enabled" translatable="false">alarms_enabled</string>
     <string name="disable_phone_vibrate" translatable="false">disable_phone_vibrate</string>
     <string name="alarm_1_speed" translatable="false">alarm_1_speed</string>
