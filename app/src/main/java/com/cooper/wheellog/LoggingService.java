@@ -142,7 +142,7 @@ public class LoggingService extends Service
             }
 
             if (logLocationData) {
-                FileUtil.writeLine(filename, "date,time,latitude,longitude,location_distance,speed,voltage,current,power,battery_level,distance,totaldistance,battery_temp,system_temp,tilt,roll,mode,alert");
+                FileUtil.writeLine(filename, "date,time,latitude,longitude,gps_speed,gps_alt,gps_heading,gps_distance,speed,voltage,current,power,battery_level,distance,totaldistance,system_temp,cpu_temp,tilt,roll,mode,alert");
                 mLocation = getLastBestLocation();
                 mLocationProvider = LocationManager.NETWORK_PROVIDER;
                 if (useGPS)
@@ -150,10 +150,10 @@ public class LoggingService extends Service
                 // Acquire a reference to the system Location Manager
                 mLocationManager.requestLocationUpdates(mLocationProvider, 250, 0, locationListener);
             } else
-                FileUtil.writeLine(filename, "date,time,speed,voltage,current,power,battery_level,distance,totaldistance,battery_temp,system_temp,tilt,roll,mode,alert");
+                FileUtil.writeLine(filename, "date,time,speed,voltage,current,power,battery_level,distance,totaldistance,system_temp,cpu_temp,tilt,roll,mode,alert");
         }
         else
-            FileUtil.writeLine(filename, "date,time,speed,voltage,current,power,battery_level,distance,totaldistance,battery_temp,system_temp,tilt,roll,mode,alert");
+            FileUtil.writeLine(filename, "date,time,speed,voltage,current,power,battery_level,distance,totaldistance,system_temp,cpu_temp,tilt,roll,mode,alert");
 
         Intent serviceIntent = new Intent(Constants.ACTION_LOGGING_SERVICE_TOGGLED);
         serviceIntent.putExtra(Constants.INTENT_EXTRA_LOGGING_FILE_LOCATION, file.getAbsolutePath());
@@ -205,20 +205,28 @@ public class LoggingService extends Service
         if (logLocationData) {
             String longitude = "";
             String latitude = "";
+            String gpsSpeed = "";
+            String gpsAlt = "";
+            String gpsBearing = "";
             if (mLocation != null) {
                 longitude = String.valueOf(mLocation.getLongitude());
                 latitude = String.valueOf(mLocation.getLatitude());
-
+                gpsSpeed = String.valueOf(mLocation.getSpeed()*3.6);
+                gpsAlt = String.valueOf(mLocation.getAltitude());
+                gpsBearing = String.valueOf(mLocation.getBearing());
                 if (mLastLocation != null)
-                    mLocationDistance += mLastLocation.distanceTo(mLocation) / 1000.0;
+                    mLocationDistance += mLastLocation.distanceTo(mLocation);
 
                 mLastLocation = mLocation;
             }
             FileUtil.writeLine(filename,
-                    String.format(Locale.US, "%s,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%.2f,%.2f,%s,%s",
+                    String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%.0f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%.2f,%.2f,%s,%s",
                             sdf.format(new Date()),
                             latitude,
                             longitude,
+                            gpsSpeed,
+                            gpsAlt,
+                            gpsBearing,
                             mLocationDistance,
                             WheelData.getInstance().getSpeedDouble(),
                             WheelData.getInstance().getVoltageDouble(),

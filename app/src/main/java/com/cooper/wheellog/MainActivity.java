@@ -18,6 +18,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -192,7 +193,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     break;
 				case Constants.ACTION_WHEEL_TYPE_RECOGNIZED:
 					//System.out.println("WheelRecognizedMain");
-					((PreferencesFragment) getPreferencesFragment()).show_main_menu();
+                    String wheel_type = intent.getStringExtra(Constants.INTENT_EXTRA_WHEEL_TYPE);
+                    //showSnackBar(getResources().getString(R.string.wheel_type_recognized, wheel_type), 5000);
+					//((PreferencesFragment) getPreferencesFragment()).show_main_menu();
 					break;
 				case Constants.ACTION_ALARM_TRIGGERED:					
 					int alarmType = ((ALARM_TYPE) intent.getSerializableExtra(Constants.INTENT_EXTRA_ALARM_TYPE)).getValue();
@@ -399,8 +402,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 tvCurrent.setVisibility(View.VISIBLE);
                 tvTitlePower.setVisibility(View.VISIBLE);
                 tvPower.setVisibility(View.VISIBLE);
-                tvTitleTemperature2.setVisibility(View.VISIBLE);
-                tvTemperature2.setVisibility(View.VISIBLE);
+                tvTitleTemperature.setVisibility(View.VISIBLE);
+                tvTemperature.setVisibility(View.VISIBLE);
                 tvTitleTotalDistance.setVisibility(View.VISIBLE);
                 tvTotalDistance.setVisibility(View.VISIBLE);
                 break;
@@ -443,6 +446,52 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 tvTitleTotalDistance.setVisibility(View.VISIBLE);
                 tvTotalDistance.setVisibility(View.VISIBLE);
 				tvTitleModel.setVisibility(View.VISIBLE);
+                tvModel.setVisibility(View.VISIBLE);
+                tvTitleVersion.setVisibility(View.VISIBLE);
+                tvVersion.setVisibility(View.VISIBLE);
+                tvTitleSerial.setVisibility(View.VISIBLE);
+                tvSerial.setVisibility(View.VISIBLE);
+                break;
+
+            case NINEBOT_Z:
+                tvWaitText.setVisibility(View.GONE);
+                tvTitleSpeed.setVisibility(View.VISIBLE);
+                tvSpeed.setVisibility(View.VISIBLE);
+                tvTitleMaxSpeed.setVisibility(View.VISIBLE);
+                tvTopSpeed.setVisibility(View.VISIBLE);
+                tvTitleAverageSpeed.setVisibility(View.VISIBLE);
+                tvAverageSpeed.setVisibility(View.VISIBLE);
+                tvTitleAverageRidingSpeed.setVisibility(View.VISIBLE);
+                tvAverageRidingSpeed.setVisibility(View.VISIBLE);
+                tvTitleBattery.setVisibility(View.VISIBLE);
+                tvBattery.setVisibility(View.VISIBLE);
+                tvTitleDistance.setVisibility(View.VISIBLE);
+                tvDistance.setVisibility(View.VISIBLE);
+                tvTitleUserDistance.setVisibility(View.VISIBLE);
+                tvUserDistance.setVisibility(View.VISIBLE);
+                tvTitleRideTime.setVisibility(View.VISIBLE);
+                tvRideTime.setVisibility(View.VISIBLE);
+                tvTitleRidingTime.setVisibility(View.VISIBLE);
+                tvRidingTime.setVisibility(View.VISIBLE);
+                tvTitleVoltage.setVisibility(View.VISIBLE);
+                tvVoltage.setVisibility(View.VISIBLE);
+                tvTitleCurrent.setVisibility(View.VISIBLE);
+                tvCurrent.setVisibility(View.VISIBLE);
+                tvTitlePower.setVisibility(View.VISIBLE);
+                tvPower.setVisibility(View.VISIBLE);
+                tvTitleTemperature.setVisibility(View.VISIBLE);
+                tvTemperature.setVisibility(View.VISIBLE);
+                tvTitleTemperature2.setVisibility(View.GONE);
+                tvTemperature2.setVisibility(View.GONE);
+                tvTitleMode.setVisibility(View.GONE);
+                tvMode.setVisibility(View.GONE);
+                tvTitleAngle.setVisibility(View.VISIBLE);
+                tvAngle.setVisibility(View.VISIBLE);
+                tvTitleRoll.setVisibility(View.VISIBLE);
+                tvRoll.setVisibility(View.VISIBLE);
+                tvTitleTotalDistance.setVisibility(View.VISIBLE);
+                tvTotalDistance.setVisibility(View.VISIBLE);
+                tvTitleModel.setVisibility(View.VISIBLE);
                 tvModel.setVisibility(View.VISIBLE);
                 tvTitleVersion.setVisibility(View.VISIBLE);
                 tvVersion.setVisibility(View.VISIBLE);
@@ -803,17 +852,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
         stopPebbleService();
         stopLoggingService();
-
+        WheelData.getInstance().full_reset();
         if (mBluetoothLeService != null) {
             unbindService(mServiceConnection);
             stopService(new Intent(getApplicationContext(), BluetoothLeService.class));
             mBluetoothLeService = null;
         }
-        WheelData.getInstance().reset();
+        super.onDestroy();
+        new CountDownTimer(500, 100) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // do something after 1s
+            }
+
+            @Override
+            public void onFinish() {
+                android.os.Process.killProcess(android.os.Process.myPid());
+                // do something end times 5s
+            }
+
+        }.start();
+
     }
 
     @Override
@@ -904,6 +966,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         boolean alarms_enabled = sharedPreferences.getBoolean(getString(R.string.alarms_enabled), false);
 		boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
 		WheelData.getInstance().setUseRatio(use_ratio);
+
+        int gotway_voltage = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_voltage), "0"));
+        WheelData.getInstance().setGotwayVoltage(gotway_voltage);
+
+        //boolean gotway_84v = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
+        //WheelData.getInstance().setGotway84V(gotway_84v);
 		WheelData.getInstance().setAlarmsEnabled(alarms_enabled);
 
         if (alarms_enabled) {
@@ -1042,8 +1110,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if (resultCode == RESULT_OK) {
                     mDeviceAddress = data.getStringExtra("MAC");
                     Timber.i("Device selected = %s", mDeviceAddress);
+                    String mDeviceName = data.getStringExtra("NAME");
+                    Timber.i("Device selected = %s", mDeviceName);
                     mBluetoothLeService.setDeviceAddress(mDeviceAddress);
                     WheelData.getInstance().full_reset();
+                    WheelData.getInstance().setBtName(mDeviceName);
                     updateScreen(true);
                     setMenuIconStates();
                     mBluetoothLeService.close();

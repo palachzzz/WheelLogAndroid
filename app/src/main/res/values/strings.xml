@@ -29,6 +29,7 @@
     <string name="start_data_service">Start Logging</string>
     <string name="stop_data_service">Stop Logging</string>
     <string name="started_logging">Started logging to %1$s</string>
+    <string name="wheel_type_recognized">Detected wheel protocol %1$s</string>
     <string name="search_for_wheel">Search for Wheel</string>
     <string name="scanning">Scanning…</string>
     <string name="devices">Devices</string>
@@ -49,8 +50,8 @@
     <string name="voltage">Voltage</string>
     <string name="current">Current</string>
     <string name="power">Power</string>
-    <string name="temperature">Battery temp</string>
-	<string name="temperature2">System temp</string>
+    <string name="temperature">System temp</string>
+	<string name="temperature2">CPU(?) temp</string>
 	<string name="angle">Tilt</string>
 	<string name="roll">Roll</string>
     <string name="fan_status">Fan Status</string>
@@ -115,6 +116,8 @@
 	<string name="start_calibration" translatable="false">start_calibration</string>
 	<string name="alarm_mode" translatable="false">alarm_mode</string>
 	<string name="gotway_84v" translatable="false">gotway_84v</string>
+    <string name="gotway_voltage" translatable="false">gotway_voltage</string>
+    <string name="no_settings" translatable="false">no_settings</string>
 	
 
     // LOG PREFERENCES
@@ -135,5 +138,8 @@
 	// TRIP PREFERENCES
 	<string name="reset_top_speed" translatable="false">reset_top_speed</string>
 	<string name="reset_user_distance" translatable="false">reset_user_distance</string>
+    <string name="last_mac" translatable="false">last_mac</string>
+    <string name="about" translatable="false">about</string>
+
 	
 </resources>

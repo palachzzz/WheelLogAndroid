@@ -4,17 +4,24 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Html;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.*;
+import android.text.InputType;
+import android.text.TextUtils;
 
 import com.cooper.wheellog.utils.Constants;
 import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
 import com.cooper.wheellog.utils.SettingsUtil;
+import com.cooper.wheellog.BuildConfig;
 import com.pavelsikun.seekbarpreference.SeekBarPreference;
+
+
 
 import timber.log.Timber;
 
@@ -208,6 +215,8 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 				Preference wheel_button = findPreference(getString(R.string.wheel_settings));
 				Preference reset_top_button = findPreference(getString(R.string.reset_top_speed));
 				Preference reset_user_distance_button = findPreference(getString(R.string.reset_user_distance));
+                Preference last_mac_button = findPreference(getString(R.string.last_mac));
+                Preference about_button = findPreference(getString(R.string.about));
 				//getActivity().sendBroadcast(new Intent(Constants.ACTION_WHEEL_SETTING).putExtra(Constants.INTENT_EXTRA_WHEEL_UPDATE_SCALE, 1));
 
 				
@@ -264,7 +273,8 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                         @Override
                         public boolean onPreferenceClick(Preference preference) {
                             currentScreen = SettingsScreen.Wheel;
-                            getPreferenceScreen().removeAll();	
+                            getPreferenceScreen().removeAll();
+                            if (mWheelType == WHEEL_TYPE.NINEBOT_Z) addPreferencesFromResource(R.xml.preferences_ninebot_z);
 							if (mWheelType == WHEEL_TYPE.INMOTION) addPreferencesFromResource(R.xml.preferences_inmotion);
 							if (mWheelType == WHEEL_TYPE.KINGSONG) addPreferencesFromResource(R.xml.preferences_kingsong);
 							if (mWheelType == WHEEL_TYPE.GOTWAY) {
@@ -306,7 +316,95 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                         }
                     });
                 }
-				
+                if (about_button != null) {
+                    about_button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            String versionName = BuildConfig.VERSION_NAME;
+                            String buildTime = BuildConfig.BUILD_TIME;
+                            new AlertDialog.Builder(getActivity())
+                                    .setTitle("About WheelLog")
+                                    .setMessage(Html.fromHtml(String.format("Version %s <br>build at %s <br>by <i>Palachzzz</i> <br><a href=\"palachzzz.wl@gmail.com\">palachzzz.wl@gmail.com</a>", versionName, buildTime)))
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_info)
+                                    .show();
+                            return true;
+                        }
+                    });
+                }
+
+
+
+                if (last_mac_button != null) {
+                    last_mac_button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle("MAC Edit");
+
+                            final EditText input = new EditText(getActivity());
+                            input.setInputType(InputType.TYPE_CLASS_TEXT);
+                            input.setText(SettingsUtil.getLastAddress(getActivity()));
+                            builder.setView(input);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    final String deviceAddress = input.getText().toString();
+                                    SettingsUtil.setLastAddress(getActivity(), deviceAddress);
+                                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+                                    builder1.setTitle("Wheel Password ( InMotion only )");
+
+                                    final EditText input1 = new EditText(getActivity());
+                                    input1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                    builder1.setView(input1);
+                                    builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            String password = input1.getText().toString();
+                                            //System.out.println("Set password ");
+                                            //System.out.println(password);
+                                            SettingsUtil.setPasswordForWheel(getActivity(), deviceAddress, password);
+                                            password = SettingsUtil.getPasswordForWheel(getActivity(),deviceAddress);
+                                            //System.out.println("Set password ");
+                                            //System.out.println(password);
+                                            //finish();
+                                        }
+                                    });
+                                    builder1.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                            //finish();
+                                        }
+                                    });
+                                    builder1.show();
+
+
+
+                                    //SettingsUtil.setPasswordForWheel(getActivity(), deviceAddress, "000000");
+                                    //finish();
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                    //finish();
+                                }
+                            });
+                            builder.show();
+
+
+                            return true;
+                        }
+
+                    });
+                }
+
                 break;
             case Speed:
                 tb.setTitle("Speed Settings");
@@ -371,8 +469,8 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 			sb_preference.setCurrentValue(stateInt);
 			/// Workaround, seekbar doesn't want to update view
             getPreferenceScreen().removeAll();
-			
-			
+
+            if (mWheelType == WHEEL_TYPE.NINEBOT_Z) addPreferencesFromResource(R.xml.preferences_ninebot_z);
 			if (mWheelType == WHEEL_TYPE.INMOTION) addPreferencesFromResource(R.xml.preferences_inmotion);
 			if (mWheelType == WHEEL_TYPE.KINGSONG) addPreferencesFromResource(R.xml.preferences_kingsong);
 			if (mWheelType == WHEEL_TYPE.GOTWAY) addPreferencesFromResource(R.xml.preferences_gotway);
@@ -438,7 +536,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 		//System.out.println("ShowMainMenuRecognized");
 		Preference wheel_button = findPreference(getString(R.string.wheel_settings));
 		mWheelType = WheelData.getInstance().getWheelType();
-		if ((mWheelType == WHEEL_TYPE.INMOTION) | (mWheelType == WHEEL_TYPE.KINGSONG) | (mWheelType == WHEEL_TYPE.GOTWAY) ) {
+		if ((mWheelType == WHEEL_TYPE.INMOTION) | (mWheelType == WHEEL_TYPE.KINGSONG) | (mWheelType == WHEEL_TYPE.GOTWAY)  | (mWheelType == WHEEL_TYPE.NINEBOT_Z)) {
 			wheel_button.setEnabled(true);
 		}
 		

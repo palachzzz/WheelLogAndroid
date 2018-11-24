@@ -5,7 +5,7 @@ import com.cooper.wheellog.BluetoothLeService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
-
+import timber.log.Timber;
 
 import static com.cooper.wheellog.utils.InMotionAdapter.Model.*;
 
@@ -18,8 +18,7 @@ public class InMotionAdapter {
     private boolean passwordSent = false;
 	private boolean needSlowData = true;
 	private boolean settingCommandReady = false;
-	private int updateIntervalScale = 1;
-	private int updateStep = 0;
+	private static int updateStep = 0;
 	private byte[] settingCommand;
 
     enum Mode {
@@ -70,6 +69,11 @@ public class InMotionAdapter {
         V5F("52", 3812.0d),
         V5FPLUS("53", 3812.0d),
         V8("80", 3812.0d),
+        Glide3("85", 3812.0d),
+        V10_test("100", 3812.0d),
+        V10F_test("101", 3812.0d),
+        V10("140", 3812.0d),
+        V10F("141", 3812.0d),
         UNKNOWN("x", 3812.0d);
 
         private String value;
@@ -95,10 +99,12 @@ public class InMotionAdapter {
         }
 
         public static Model findById(String id) {
+            Timber.i("Model %s", id);
             for (Model m : Model.values()) {
                 if (m.getValue().equals(id)) return m;
             }
             return Model.UNKNOWN;
+            //return Model.V8;
         }
 
         public static Model findByBytes(byte[] data) {
@@ -106,9 +112,12 @@ public class InMotionAdapter {
             if (data.length >= 108) {
                 if (data[107] > (byte) 0) {
                     stringBuffer.append(data[107]);
+                    //stringBuffer.append(0x0a);
                 }
                 stringBuffer.append(data[104]);
+                //stringBuffer.append(0x01);
             }
+
             return Model.findById(stringBuffer.toString());
         }
     }
@@ -147,41 +156,45 @@ public class InMotionAdapter {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                if (!passwordSent) {
-                    if (mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.getPassword(inmotionPassword).writeBuffer())) passwordSent = true;
-                    System.out.println("Sent password message");
-                } else if ((model == UNKNOWN) | needSlowData ) {
-                    mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.getSlowData().writeBuffer());
-                    System.out.println("Sent infos message");
-                }
-                else if (settingCommandReady){
-					needSlowData = true;
-					settingCommandReady = false;
-					mBluetoothLeService.writeBluetoothGattCharacteristic(settingCommand);
-                    System.out.println("Sent command message");
+                if (updateStep == 0) {
+                    if (!passwordSent) {
+                        if (mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.getPassword(inmotionPassword).writeBuffer())) {
+                            passwordSent = true;
+                            Timber.i("Sent password message");
+                        } else updateStep = 39;
+
+                    } else if ((model == UNKNOWN) | needSlowData ) {
+                        if (mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.getSlowData().writeBuffer())) {
+                            Timber.i("Sent infos message");
+                        } else updateStep = 39;
+
+                    } else if (settingCommandReady) {
+    					if (mBluetoothLeService.writeBluetoothGattCharacteristic(settingCommand)) {
+                            needSlowData = true;
+                            settingCommandReady = false;
+                            Timber.i("Sent command message");
+                        } else updateStep = 39; // after +1 and %10 = 0
+    				}
+    				else {
+                        if (!mBluetoothLeService.writeBluetoothGattCharacteristic(CANMessage.standardMessage().writeBuffer())) {
+                            Timber.i("Unable to send keep-alive message");
+                            updateStep = 39;
+    					} else {
+                            Timber.i("Sent keep-alive message");
+    					}
+                    }
+
 				}
-				else {
-					if (updateStep == updateIntervalScale) {
-						if (!mBluetoothLeService.writeBluetoothGattCharacteristic(CANMessage.standardMessage().writeBuffer())) {
-							System.out.println("Unable to send keep-alive message");
-						} else {
-							System.out.println("Sent keep-alive message");
-						}
-						updateStep = 1;
-					} else {
-						updateStep += 1;
-					}
-				}
+                updateStep += 1;
+                updateStep %= 40;
+                Timber.i("Step: %d", updateStep);
             }
         };
         keepAliveTimer = new Timer();
-        keepAliveTimer.scheduleAtFixedRate(timerTask, 0, 125);
+        keepAliveTimer.scheduleAtFixedRate(timerTask, 0, 25);
     }
 	
-	public void setScale(int scale) {
-		updateIntervalScale = scale;
-	}
-	
+
 	public void resetConnection() {
 		passwordSent = false;
 	}
@@ -313,7 +326,7 @@ public class InMotionAdapter {
             } else {
                 batt = 0.0;
             }
-        } else if (model.belongToInputType( "5") || model == Model.V8) {
+        } else if (model.belongToInputType( "5") || model == Model.V8 || model == Model.Glide3 || model == Model.V10 || model == Model.V10F || model == Model.V10_test || model == Model.V10F_test) {//            if (volts > 84.00) {
             if (volts > 82.50) {
                 batt = 1.0;
             } else if (volts > 68.0) {
@@ -321,6 +334,13 @@ public class InMotionAdapter {
             } else {
                 batt = 0.0;
             }
+
+//                batt = 1.0;
+//            } else if (volts > 68.5) {
+//                batt = (volts - 68.5) / 15.5;
+//            } else {
+//                batt = 0.0;
+//            }
         } else if (model.belongToInputType("6")) {
             batt = 0.0;
         } else {
@@ -465,7 +485,7 @@ public class InMotionAdapter {
                     ", lock=" + lock +
 					", temperature=" + temperature +
 					", temperature2=" + temperature2 +
-					", temperature2=" + workModeInt +
+					", workmode=" + workModeInt +
                     '}';
         }
     }
@@ -587,6 +607,11 @@ public class InMotionAdapter {
 				case "52": return "Inmotion V5F";
 				case "53": return "Inmotion V5FPLUS";
 				case "80": return "Inmotion V8";
+                case "85": return "Solowheel Glide 3";
+                case "100": return "Inmotion V10 test";
+                case "101": return "Inmotion V10F test";
+                case "140": return "Inmotion V10";
+                case "141": return "Inmotion V10F";
 				default: return "Unknown";
 			}
         }
@@ -651,6 +676,7 @@ public class InMotionAdapter {
             GetFastInfo(0x0F550113),
             GetSlowInfo(0x0F550114),
             //RemoteControl(0x0F550116),
+            RideMode(0x0F550115),
             PinCode(0x0F550307),
 			Light(0x0F55010D),  
 			Led(0x0F550116),  
@@ -704,7 +730,7 @@ public class InMotionAdapter {
         public byte[] writeBuffer() {
 
             byte[] canBuffer = getBytes();
-            int check = computeCheck(canBuffer);
+            byte check = computeCheck(canBuffer);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             out.write(0xAA);
@@ -763,14 +789,14 @@ public class InMotionAdapter {
             data = new byte[data.length];
         }
 
-        private static int computeCheck(byte[] buffer) {
+        private static byte computeCheck(byte[] buffer) {
 
             int check = 0;
             for (byte c : buffer) {
-                check = (check + (int) c);
+                check = (check + c) & 0xFF;
 				//check = (check + (int) c) % 256;
             }
-            return (check & 0xFF);
+            return (byte) check;
         }
 
         private int intFromBytes(byte[] bytes, int starting) {
@@ -807,14 +833,19 @@ public class InMotionAdapter {
             if (buffer[0] != (byte) 0xAA || buffer[1] != (byte) 0xAA || buffer[buffer.length - 1] != (byte) 0x55 || buffer[buffer.length - 2] != (byte) 0x55) {
                 return null;  // Header and tail not correct
             }
-			System.out.println(CANMessage.toHexString(buffer));
+            Timber.i("Before escape %s", CANMessage.toHexString(buffer));
             byte[] dataBuffer = Arrays.copyOfRange(buffer, 2, buffer.length - 3);
 
             dataBuffer = CANMessage.unescape(dataBuffer);
-            int check = CANMessage.computeCheck(dataBuffer);
+            Timber.i("After escape %s", CANMessage.toHexString(dataBuffer));
+            byte check = CANMessage.computeCheck(dataBuffer);
 
-            int bufferCheck = buffer[buffer.length - 3] & 0xFF;
-
+            byte bufferCheck = buffer[buffer.length - 3];
+            if (check == bufferCheck) {
+                Timber.i("Check OK");
+            } else {
+                Timber.i("Check FALSE, calc: %02X, packet: %02X",check, bufferCheck);
+            }
             return (check == bufferCheck) ? new CANMessage(dataBuffer) : null;
 
         }
@@ -824,7 +855,7 @@ public class InMotionAdapter {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            for (int c : buffer) {
+            for (byte c : buffer) {
                 if (c == (byte) 0xAA || c == (byte) 0x55 || c == (byte) 0xA5) {
                     out.write(0xA5);
                 }
@@ -837,13 +868,15 @@ public class InMotionAdapter {
         private static byte[] unescape(byte[] buffer) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int oldc = 0;
+            boolean oldca5 = false;
 
-            for (int c : buffer) {
-                if (c != (byte) 0xA5 || oldc == (byte) 0xA5) {
+            for (byte c : buffer) {
+                if (c != (byte) 0xA5 || oldca5)  {
                     out.write(c);
+                    oldca5=false;
+                } else {
+                    oldca5 = true;
                 }
-                oldc = c;
             }
             return out.toByteArray();
         }
@@ -938,6 +971,18 @@ public class InMotionAdapter {
 			
             return msg;
         }
+
+        public static CANMessage setRideMode(int rideMode) {
+            /// rideMode =0 -Comfort, =1 -Classic
+            CANMessage msg = new CANMessage();
+            msg.len = 8;
+            msg.id = IDValue.RideMode.getValue();
+            msg.ch = 5;
+            msg.type = CanFrame.DataFrame.getValue();
+            msg.data = new byte[]{(byte) 0x0a, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) rideMode, (byte) 0x00 , (byte) 0x00, (byte) 0x00};
+
+            return msg;
+        }
 		
 		public static CANMessage setSpeakerVolume(int speakerVolume) {
             CANMessage msg = new CANMessage();
@@ -964,9 +1009,7 @@ public class InMotionAdapter {
             msg.ch = 5;
             msg.type = CanFrame.DataFrame.getValue();
 			msg.data = new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) llowByte, (byte) lhighByte, (byte) hlowByte, (byte) hhighByte};
-			System.out.println(String.format("%08X", tiltHorizon));
-			System.out.println(String.format("%08X", tilt));
-			System.out.println(CANMessage.toHexString(msg.data));
+
             return msg;
         }
 		
@@ -1037,10 +1080,9 @@ public class InMotionAdapter {
 
             double distance;
 
-            if (model.belongToInputType( "1")
-                    || model.belongToInputType( "5")
-                    || model == V8) {
-                distance = (double) (this.longFromBytes(ex_data, 44)) / 1000.0d;
+            if (model.belongToInputType( "1") || model.belongToInputType( "5") ||
+                    model == V8 || model == Glide3 || model == V10 || model == V10F || model == V10_test || model == V10F_test) {
+                distance = (double) (this.intFromBytes(ex_data, 44)) / 1000.0d; ///// V10F 48 byte - trip distance
             } else if (model == R0) {
                 distance = (double) (this.longFromBytes(ex_data, 44)) / 1000.0d;
 
@@ -1100,8 +1142,11 @@ public class InMotionAdapter {
 				case 0x26:
 					fullText = String.format(Locale.ENGLISH, "High load at speed %.2f and current %.2f %s", a_speed, (alertValue/1000.0), hex);
 					break;
+                case 0x1d:
+                    fullText = String.format(Locale.ENGLISH, "Please repair: bad battery cell found. At voltage %.2f %s", (alertValue2/100.0), hex);
+                    break;
 				default: 
-					fullText = String.format(Locale.ENGLISH, "Unknown Alert %.2f %.2f hex %s", alertValue, alertValue2, hex);					
+					fullText = String.format(Locale.ENGLISH, "Unknown Alert %.2f %.2f, please contact palachzzz, hex %s", alertValue, alertValue2, hex);
 			}
 			return new Alert(alertId, alertValue, alertValue2, fullText);
 			
@@ -1111,6 +1156,7 @@ public class InMotionAdapter {
         Infos parseSlowInfoMessage() {
             if (ex_data == null) return null;
             Model model = Model.findByBytes(ex_data);  // CarType is just model.rawValue
+
 			//model = V8;
             //int v = this.intFromBytes(ex_data, 24);
             int v0 = ex_data[27]&0xFF;
@@ -1118,7 +1164,7 @@ public class InMotionAdapter {
             int v2 = ((ex_data[25]&0xFF)*256) | (ex_data[24]&0xFF);
             String version = String.format(Locale.ENGLISH, "%d.%d.%d", v0, v1, v2);
             String serialNumber = "";
-			System.out.println(CANMessage.toHexString(ex_data));
+			//System.out.println(CANMessage.toHexString(ex_data));
 			int maxspeed = 0;
 			int speakervolume = 0;
 			boolean light = false;
@@ -1229,11 +1275,13 @@ public class InMotionAdapter {
                     buffer.write(c);
                     if (c == (byte) 0x55 && oldc == (byte) 0x55) {
                         state = UnpackerState.done;
+                        updateStep = 0;
                         oldc = c;
+                        Timber.i("Step reset");
                         return true;
                     }
                     oldc = c;
-
+                    break;
                 default:
                     if (c == (byte) 0xAA && oldc == (byte) 0xAA) {
                         buffer = new ByteArrayOutputStream();
@@ -1257,8 +1305,10 @@ public class InMotionAdapter {
 
     public static InMotionAdapter getInstance() {
         if (INSTANCE == null) {
+            Timber.i("New instance");
             INSTANCE = new InMotionAdapter();
         }
+        Timber.i("Get instance");
         return INSTANCE;
     }
 
@@ -1267,6 +1317,17 @@ public class InMotionAdapter {
             INSTANCE.keepAliveTimer.cancel();
             INSTANCE.keepAliveTimer = null;
         }
+        Timber.i("New instance");
         INSTANCE = new InMotionAdapter();
     }
+
+    public static void stopTimer() {
+        if (INSTANCE != null && INSTANCE.keepAliveTimer != null) {
+            INSTANCE.keepAliveTimer.cancel();
+            INSTANCE.keepAliveTimer = null;
+        }
+        Timber.i("Kill instance, stop timer");
+        INSTANCE = null;
+    }
+
 }
