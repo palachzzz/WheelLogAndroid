@@ -363,6 +363,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                         }
                     });
                 }
+
                 if (last_mac_button != null) {
                     last_mac_button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                         @Override
@@ -407,6 +408,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                                     });
                                     builder1.show();
 
+
                                     //SettingsUtil.setPasswordForWheel(getActivity(), deviceAddress, "000000");
                                     //finish();
                                 }
@@ -420,10 +422,12 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                             });
                             builder.show();
 
+
                             return true;
                         }
                     });
                 }
+
                 break;
             case Speed:
                 tb.setTitle("Speed Settings");

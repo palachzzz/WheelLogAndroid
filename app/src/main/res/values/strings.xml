@@ -137,4 +137,5 @@
 	<string name="reset_top_speed" translatable="false">reset_top_speed</string>
 	<string name="reset_user_distance" translatable="false">reset_user_distance</string>
     <string name="last_mac" translatable="false">last_mac</string>
+
 </resources>

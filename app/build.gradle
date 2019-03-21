@@ -1,8 +1,9 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    //buildToolsVersion '27.0.3'
+    compileSdkVersion 25
+    buildToolsVersion '27.0.3'
+
     lintOptions {
         abortOnError false
     }
@@ -43,7 +44,7 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.3.1'
     implementation 'com.pavelsikun:material-seekbar-preference:2.3.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.0'
-    implementation 'com.github.hotchemi:permissionsdispatcher:2.2.0'
-    annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.2.0'
-    //apt "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+    implementation "com.github.hotchemi:permissionsdispatcher:2.2.0"
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
+
 }
