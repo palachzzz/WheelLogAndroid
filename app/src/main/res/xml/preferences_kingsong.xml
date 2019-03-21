@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools"
+	xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sample="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
@@ -39,6 +39,11 @@
         android:entryValues="@array/pedals_mode_values"
         android:summary="Soft/Medium/Hard" />
 
+	<CheckBoxPreference
+		android:key="@string/gotway_84v"
+		android:title="This wheel has a 84V battery"
+		android:summary="If your wheel reads 84V when fully charged" />
+
     <com.pavelsikun.seekbarpreference.SeekBarPreference
         android:key="@string/wheel_max_speed"
         android:title="Wheel speed limit"
@@ -50,5 +55,36 @@
         sample:msbp_interval="1"
         sample:msbp_measurementUnit="km/h"
         sample:msbp_dialogEnabled="true"/>
-		
+	<com.pavelsikun.seekbarpreference.SeekBarPreference
+		android:key="ks_speed_alarm_3"
+		android:title="Wheel Speed Alarm 3"
+		android:enabled="true"
+		android:defaultValue="0"
+		sample:msbp_minValue="0"
+		sample:msbp_maxValue="50"
+		sample:msbp_interval="1"
+		sample:msbp_measurementUnit="km/h"
+		sample:msbp_dialogEnabled="true"/>
+	<com.pavelsikun.seekbarpreference.SeekBarPreference
+		android:key="ks_speed_alarm_2"
+		android:title="Wheel Speed Alarm 2"
+		android:enabled="true"
+		android:defaultValue="0"
+		sample:msbp_minValue="0"
+		sample:msbp_maxValue="50"
+		sample:msbp_interval="1"
+		sample:msbp_measurementUnit="km/h"
+		sample:msbp_dialogEnabled="true"/>
+	<com.pavelsikun.seekbarpreference.SeekBarPreference
+		android:key="ks_speed_alarm_1"
+		android:title="Wheel Speed Alarm 1"
+		android:enabled="true"
+		android:defaultValue="0"
+		sample:msbp_minValue="0"
+		sample:msbp_maxValue="50"
+		sample:msbp_interval="1"
+		sample:msbp_measurementUnit="km/h"
+		sample:msbp_dialogEnabled="true"/>
+
+
 </PreferenceScreen>

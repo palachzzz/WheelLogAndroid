@@ -131,10 +131,37 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 				boolean handle_button_disabled = sharedPreferences.getBoolean(getString(R.string.handle_button_disabled), false);
 				WheelData.getInstance().updateHandleButton(handle_button_disabled);
 				break;
+            case "ks_speed_alarm_1":
+            case "ks_speed_alarm_2":
+            case "ks_speed_alarm_3":
 			case "wheel_max_speed":
+                final int max_speed = sharedPreferences.getInt(getString(R.string.wheel_max_speed), 0);
+                final int spd_alarm_1 = sharedPreferences.getInt("ks_speed_alarm)1", 0);
+                final int spd_alarm_2 = sharedPreferences.getInt("ks_speed_alarm)2", 0);
+                final int spd_alarm_3 = sharedPreferences.getInt("ks_speed_alarm)3", 0);
+		        new AlertDialog.Builder(getActivity())
+                			.setTitle("Wheel Speed Alarm Change")
+                			.setMessage("Do you want to write these alarms to your Kingsong wheel?\n 1/ 2/ 3/ tiltback\n"+
+                                    String.format("%2d/%2d/%2d/%2d km/h", spd_alarm_1, spd_alarm_2, spd_alarm_3, max_speed))
+                			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                				public void onClick(DialogInterface dialog, int which) {
+                					WheelData.getInstance().updateMaxSpeed(max_speed, spd_alarm_1, spd_alarm_2, spd_alarm_3);
+                				}
+                			})
+                			.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                				public void onClick(DialogInterface dialog, int which) {
+                					// no action needed as changes to alarms should accumulative but we might need to add wanring message and reset of tiltback if answer is negative
+                				    //mSpeedWarningDisplayed = true;
+                					//correctWheelBarState(getString(R.string.wheel_max_speed), WheelData.getInstance().getWheelMaxSpeed());
+
+                				}
+                			})
+                			.setIcon(android.R.drawable.ic_dialog_alert)
+                			.show();
+
 				//if (!mSpeedWarningDisplayed) {
-				final int max_speed = sharedPreferences.getInt(getString(R.string.wheel_max_speed), 0);
-				WheelData.getInstance().updateMaxSpeed(max_speed);
+				//final int max_speed = sharedPreferences.getInt(getString(R.string.wheel_max_speed), 0);
+				//WheelData.getInstance().updateMaxSpeed(max_speed);
 				//	if (max_speed > 30)  {
 				//		new AlertDialog.Builder(getActivity())
 				//			.setTitle("Are you sure?")

@@ -1,20 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    //buildToolsVersion "25.0.0"
-
+    compileSdkVersion 24
+    //buildToolsVersion '27.0.3'
     lintOptions {
         abortOnError false
     }
-
     defaultConfig {
         applicationId "com.cooper.wheellog"
         vectorDrawables.useSupportLibrary = true
-        minSdkVersion 18
-        targetSdkVersion 25
+        minSdkVersion 24
+        targetSdkVersion 24
         versionCode 34
-        versionName "2.0.9"
+        versionName '2.0.10'
     }
     buildTypes {
         release {
@@ -22,21 +20,30 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 //apply plugin: 'android-apt'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:design:25.1.0'
-    implementation 'com.android.support:gridlayout-v7:25.1.0'
-    implementation 'com.google.android.gms:play-services-drive:10.0.1'
+    // implementation 'com.android.support:appcompat-v7:24.2.1'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:animated-vector-drawable:24.2.1'
+    implementation 'com.android.support:support-compat:24.2.1'
+    implementation 'com.android.support:design:24.2.1'
+    implementation 'com.android.support:preference-v7:24.2.1'
+    implementation 'com.android.support:gridlayout-v7:24.2.1'
+    //implementation 'com.google.android.gms:play-services-base:15.0.1'
+    //implementation 'com.google.android.gms:play-services-identity:15.0.1'
+    //implementation 'com.google.android.gms:play-services-auth:16.0.0'
+    implementation 'com.google.android.gms:play-services-drive:10.2.0'
     implementation 'com.getpebble:pebblekit:3.1.0'
     implementation 'com.github.JakeWharton:ViewPagerIndicator:2.4.1'
     implementation 'com.jakewharton.timber:timber:4.3.1'
-    implementation 'com.pavelsikun:material-seekbar-preference:2.3.0+'
+    implementation 'com.pavelsikun:material-seekbar-preference:2.3.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.0'
-    implementation "com.github.hotchemi:permissionsdispatcher:2.2.0"
+    implementation 'com.github.hotchemi:permissionsdispatcher:2.2.0'
     annotationProcessor 'com.github.hotchemi:permissionsdispatcher-processor:2.2.0'
     //apt "com.github.hotchemi:permissionsdispatcher-processor:2.2.0"
 }

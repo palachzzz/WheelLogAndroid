@@ -78,7 +78,10 @@ public class WheelData {
 	private boolean mWheelLedEnabled = false;
 	private boolean mWheelButtonDisabled = false;
 	private int mWheelMaxSpeed = 25;
-	private int mWheelSpeakerVolume = 50;
+	private int nWheelSpeedAlarm1 = 0;
+    private int nWheelSpeedAlarm2 = 0;
+    private int nWheelSpeedAlarm3 = 0;
+    private int mWheelSpeakerVolume = 50;
 	private int mWheelTiltHorizon = 0;
 	
     private boolean mAlarmsEnabled = false;
@@ -310,7 +313,11 @@ public class WheelData {
 		}
     }
 
-	public void updateMaxSpeed(int wheelMaxSpeed) {
+    public void updateMaxSpeed(int wheelMaxSpeed) {
+        this.updateMaxSpeed(wheelMaxSpeed, 0, 0, wheelMaxSpeed - 1);
+    }
+
+	public void updateMaxSpeed(int wheelMaxSpeed, int spd_alarm_1, int spd_alarm_2, int spd_alarm_3) {
 		if (mWheelType == WHEEL_TYPE.INMOTION) {
 			if (mWheelMaxSpeed != wheelMaxSpeed) {
 				mWheelMaxSpeed = wheelMaxSpeed;
@@ -345,8 +352,17 @@ public class WheelData {
             byte[] data = new byte[20];
             data[0] = (byte) 0xAA;
             data[1] = (byte) 0x55;
-			data[6] = (byte) 0x1F;
-			data[8] = (byte) wheelMaxSpeed;
+            data[2] = (byte)spd_alarm_1;
+            data[3] = 0;
+
+            data[4] = (byte)spd_alarm_2;
+            data[5] = 0;
+            data[6] = (byte)spd_alarm_3;
+            data[7] = 0;
+            data[8] = (byte)wheelMaxSpeed;
+            data[9] = 0;
+			//data[6] = (byte) 0x1F;      // hardcoded to 31 km/h, yuck!
+			//data[8] = (byte) wheelMaxSpeed;
             data[16] = (byte) 0x85;
             data[17] = (byte) 0x14;
             data[18] = (byte) 0x5A;
@@ -785,10 +801,10 @@ public class WheelData {
         if (data.length >= 20) {
             int a1 = data[0] & 255;
             int a2 = data[1] & 255;
-            if (a1 != 170 || a2 != 85) {
+            if (a1 != 170 || a2 != 85) {    // needs to be 0xAA and 0x55 !
                 return false;
             }
-            if ((data[16] & 255) == 169) { // Live data
+            if ((data[16] & 255) == 169) { // Live data  0xA9
                 mVoltage = byteArrayInt2(data[2], data[3]);
                 mSpeed = byteArrayInt2(data[4], data[5]);
                 mTotalDistance = byteArrayInt4(data[6], data[7], data[8], data[9]);
@@ -812,7 +828,7 @@ public class WheelData {
                 setBatteryPercent(battery);
 
                 return true;
-            } else if ((data[16] & 255) == 185) { // Distance/Time/Fan Data
+            } else if ((data[16] & 255) == 185) { // Distance/Time/Fan Data  0xB9
                 long distance = byteArrayInt4(data[2], data[3], data[4], data[5]);
                 setDistance(distance);
                 //int currentTime = byteArrayInt2(data[6], data[7]);
@@ -820,7 +836,7 @@ public class WheelData {
                 setCurrentTime(currentTime);
                 setTopSpeed(byteArrayInt2(data[8], data[9]));
                 mFanStatus = data[12];
-            } else if ((data[16] & 255) == 187) { // Name and Type data
+            } else if ((data[16] & 255) == 187) { // Name and Type data  0xBB
                 int end = 0;
                 int i = 0;
                 while (i < 14 && data[i + 2] != 0) {
@@ -841,12 +857,19 @@ public class WheelData {
                 } catch (Exception ignored) {
                 }
 
-            } else if ((data[16] & 255) == 179) { // Serial Number
+            } else if ((data[16] & 255) == 179) { // Serial Number  0xB3
                 byte[] sndata = new byte[18];
                 System.arraycopy(data, 2, sndata, 0, 14);
                 System.arraycopy(data, 17, sndata, 14, 3);
                 sndata[17] = (byte) 0;
                 mSerialNumber = new String(sndata);
+            } else if ((data[16] & 0xff) == 0xb5) {  // Speed Alarm report
+                nWheelSpeedAlarm1 = byteArrayInt2(data[4], data[5]);
+                nWheelSpeedAlarm2 = byteArrayInt2(data[6], data[7]);
+                nWheelSpeedAlarm3 = byteArrayInt2(data[8], data[9]);
+                mWheelMaxSpeed = byteArrayInt2(data[10], data[11]);
+
+                // here we need to adjust the PreferenceBars to reflect the readback
             }
         }
         return false;
@@ -1004,6 +1027,9 @@ public class WheelData {
 		mWheelLedEnabled = false;
 		mWheelButtonDisabled = false;
 		mWheelMaxSpeed = 25;
+		nWheelSpeedAlarm1 = 0;
+        nWheelSpeedAlarm2 = 0;
+        nWheelSpeedAlarm3 = 0;
 		mWheelSpeakerVolume = 50;
 	
     }
