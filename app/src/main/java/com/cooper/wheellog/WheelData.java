@@ -817,13 +817,17 @@ public class WheelData {
 					mModeStr = String.format(Locale.US, "%d", mMode);
                 }
 
+                int iVoltage = mVoltage;
+                if (mGotway84V) {
+                    iVoltage = (int)Math.round(mVoltage * 0.8);
+                }
                 int battery;
-                if (mVoltage < 5000) {
+                if (iVoltage < 5000) {
                     battery = 0;
-                } else if (mVoltage >= 6600) {
+                } else if (iVoltage >= 6600) {
                     battery = 100;
                 } else {
-                    battery = (mVoltage - 5000) / 16;
+                    battery = (iVoltage - 5000) / 16;
                 }
                 setBatteryPercent(battery);
 
