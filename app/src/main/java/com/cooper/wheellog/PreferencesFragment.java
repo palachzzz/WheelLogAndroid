@@ -70,6 +70,10 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
             case "alarms_enabled":
                 hideShowSeekBars();
                 break;
+            case "inMotion_alarms_enabled":
+                WheelData.getInstance().setInmotionAlarmsEnabled(getPreferenceManager().getSharedPreferences()
+                        .getBoolean(getString(R.string.inMotion_alarms_enabled), false));
+                break;
             case "auto_upload":
                 if (SettingsUtil.isAutoUploadEnabled(getActivity()) && !mDataWarningDisplayed) {
                     SettingsUtil.setAutoUploadEnabled(getActivity(), false);

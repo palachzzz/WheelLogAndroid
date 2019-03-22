@@ -519,6 +519,9 @@ public class InMotionAdapter {
 			return fullText;
 			
         }
+        public int getAlertId(){
+		    return alertId;
+        }
 		
 		
 	}

@@ -9,6 +9,11 @@
         android:summary="Allow the phone to vibrate as a warning" />
 
     <CheckBoxPreference
+        android:key="@string/inMotion_alarms_enabled"
+        android:title="Enable InMotion Alarms"
+        android:summary="Enable InMotion Specific General Alarms" />
+
+    <CheckBoxPreference
         android:key="@string/disable_phone_vibrate"
         android:dependency="alarms_enabled"
         android:title="Disable Phone Vibration"
