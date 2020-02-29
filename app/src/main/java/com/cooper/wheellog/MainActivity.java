@@ -16,10 +16,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.MediaPlayer;
-import android.os.IBinder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -32,19 +32,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.os.Handler;
 import android.view.View;
 import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
 import com.cooper.wheellog.utils.Constants;
-import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
 import com.cooper.wheellog.utils.Constants.ALARM_TYPE;
+import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
 import com.cooper.wheellog.utils.SettingsUtil;
-//import com.cooper.wheellog.utils.NotificationUtil;
 import com.cooper.wheellog.utils.Typefaces;
 import com.cooper.wheellog.views.WheelView;
 import com.github.mikephil.charting.charts.LineChart;
@@ -64,11 +60,6 @@ import com.viewpagerindicator.LinePageIndicator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.util.Rational;
-import android.app.PictureInPictureParams;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnPermissionDenied;
@@ -170,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 finish();
             }
 
+            setupConnectedSound();
             if (mBluetoothLeService.getConnectionState() == BluetoothLeService.STATE_DISCONNECTED &&
                     mDeviceAddress != null && !mDeviceAddress.isEmpty()) {
                 mBluetoothLeService.setDeviceAddress(mDeviceAddress);
@@ -1091,13 +1083,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         boolean currentOnDial = sharedPreferences.getBoolean(getString(R.string.current_on_dial), false);
         wheelView.setCurrentOnDial(currentOnDial);
         wheelView.invalidate();
-        final boolean connectSound = sharedPreferences.getBoolean(getString(R.string.connection_sound), false);
-        final int beepPeriod = sharedPreferences.getInt(getString(R.string.no_connection_sound), 0) * 1000;
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mBluetoothLeService.setConnectionSounds(connectSound, beepPeriod);                    }
-        }, 100);
 
         int gotway_voltage = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_voltage), "1"));
         WheelData.getInstance().setGotwayVoltage(gotway_voltage);
@@ -1176,6 +1161,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     void locationPermissionDenied() {
         SettingsUtil.setLogLocationEnabled(this, false);
         ((PreferencesFragment) getPreferencesFragment()).refreshVolatileSettings();
+    }
+
+    private void setupConnectedSound() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        final boolean connectSound = preferences.getBoolean(getString(R.string.connection_sound), false);
+        final int beepPeriod = preferences.getInt(getString(R.string.no_connection_sound), 0) * 1000;
+        mBluetoothLeService.setConnectionSounds(connectSound, beepPeriod);
     }
 
     private void showSnackBar(int msg) { showSnackBar(getString(msg)); }
