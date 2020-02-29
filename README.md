@@ -1,3 +1,5 @@
+![Android CI](https://github.com/YakushevVladimir/WheelLogAndroid/workflows/Android%20CI/badge.svg)
+
 # WheelLogAndroid
 
 One more try to make it working with Inmotion V8
